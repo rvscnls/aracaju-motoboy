@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Plus, Bike, MapPin, Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
+import { Plus, Bike, MapPin, Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 const FORMAS_PAGAMENTO = [
   { valor: 'pix', label: 'Pix' },
@@ -79,6 +80,8 @@ function aplicarMudancaRealtime(setState, mapRow, payload, { prepend = false } =
 }
 
 export default function PainelDespacho() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [abaAtiva, setAbaAtiva] = useState('despacho');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
@@ -283,6 +286,12 @@ export default function PainelDespacho() {
     if (error) alert('Não deu pra remover o motoboy: ' + error.message);
   }
 
+  async function sair() {
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  }
+
   return (
     <div style={{ fontFamily: 'var(--font-body)', background: 'var(--bg)', color: 'var(--ink)' }} className="w-full min-h-full p-4 md:p-6">
       <style>{`
@@ -315,8 +324,18 @@ export default function PainelDespacho() {
           <div className="disp text-xl md:text-2xl font-semibold tracking-tight">Aracaju Motoboy</div>
           <div className="text-xs" style={{ color: 'var(--ink-soft)' }}>painel de despacho</div>
         </div>
-        <div className="text-xs px-3 py-1 rounded-full capitalize" style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}>
-          {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+        <div className="flex items-center gap-2">
+          <div className="text-xs px-3 py-1 rounded-full capitalize" style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}>
+            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+          </div>
+          <button
+            type="button"
+            onClick={sair}
+            className="text-xs px-3 py-1 rounded-full flex items-center gap-1"
+            style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}
+          >
+            <LogOut size={12} /> sair
+          </button>
         </div>
       </div>
 

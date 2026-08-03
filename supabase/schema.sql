@@ -44,17 +44,10 @@ create index if not exists pedidos_cliente_id_idx on public.pedidos (cliente_id)
 create index if not exists pedidos_motoboy_id_idx on public.pedidos (motoboy_id);
 
 -- ========== RLS (Row Level Security) ==========
--- Este é um painel interno, sem tela de login. Para o app funcionar direto
--- com a chave pública (anon key), liberamos leitura/escrita para qualquer
--- requisição que use essa chave.
---
--- ATENÇÃO: isso significa que qualquer pessoa que descobrir a URL e a chave
--- anon do seu projeto (que ficam visíveis no código do site publicado)
--- consegue ler e alterar os dados — incluindo CPF e endereço de motoboys e
--- clientes. Para um painel interno de uso restrito da equipe, o risco é
--- baixo, mas se isso te preocupar, o próximo passo recomendado é adicionar
--- login (Supabase Auth) e trocar essas políticas por regras que exigem
--- usuário autenticado.
+-- Estas políticas iniciais liberavam leitura/escrita pra qualquer requisição
+-- com a chave anon (não havia login ainda). Depois que o login foi
+-- adicionado ao painel, rode supabase/policies-auth.sql para trocar essas
+-- políticas por regras que exigem usuário autenticado.
 
 alter table public.clientes enable row level security;
 alter table public.motoboys enable row level security;
