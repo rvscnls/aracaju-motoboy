@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Plus, Bike, MapPin, Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -295,21 +296,23 @@ export default function PainelDespacho() {
   return (
     <div style={{ fontFamily: 'var(--font-body)', background: 'var(--bg)', color: 'var(--ink)' }} className="w-full min-h-full p-4 md:p-6">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
         :root {
-          --bg: #FBFAF6;
-          --ink: #1C2A28;
-          --ink-soft: #5B6D69;
-          --line: #DEDCD1;
+          --bg: #F3F1EA;
+          --ink: #1A1A1A;
+          --ink-soft: #5C6B61;
+          --line: #DCD8CC;
           --card: #FFFFFF;
-          --accent: #FF5A2E;
-          --accent-ink: #7A2200;
+          --marca: #1F3D2B;
+          --marca-clara: #6FBE44;
+          --accent: #6FBE44;
+          --accent-ink: #1F3D2B;
           --transito: #F5B400;
           --transito-ink: #6B4E00;
-          --sucesso: #0E9C6E;
-          --sucesso-ink: #054D36;
+          --sucesso: #6FBE44;
+          --sucesso-ink: #1F3D2B;
           --perigo-ink: #9C2B2B;
-          --font-display: 'Space Grotesk', sans-serif;
+          --font-display: 'Baloo 2', sans-serif;
           --font-body: 'IBM Plex Sans', sans-serif;
         }
         .disp { font-family: var(--font-display); }
@@ -321,8 +324,8 @@ export default function PainelDespacho() {
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
-          <div className="disp text-xl md:text-2xl font-semibold tracking-tight">Aracaju Motoboy</div>
-          <div className="text-xs" style={{ color: 'var(--ink-soft)' }}>painel de despacho</div>
+          <Image src="/logo.png" alt="Aracaju Motoboy" width={804} height={316} priority className="h-9 md:h-11 w-auto" />
+          <div className="text-xs mt-1" style={{ color: 'var(--ink-soft)' }}>Painel de despacho</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-xs px-3 py-1 rounded-full capitalize" style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}>
@@ -334,20 +337,20 @@ export default function PainelDespacho() {
             className="text-xs px-3 py-1 rounded-full flex items-center gap-1"
             style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}
           >
-            <LogOut size={12} /> sair
+            <LogOut size={12} /> Sair
           </button>
         </div>
       </div>
 
       <div className="inline-flex flex-wrap p-1 rounded-full mb-6 gap-1" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-        <button type="button" onClick={() => setAbaAtiva('despacho')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'despacho' ? { background: 'var(--ink)', color: 'white' } : { color: 'var(--ink-soft)' }}>
-          <Bike size={14} /> despacho
+        <button type="button" onClick={() => setAbaAtiva('despacho')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'despacho' ? { background: 'var(--marca)', color: 'white' } : { color: 'var(--ink-soft)' }}>
+          <Bike size={14} /> Despacho
         </button>
-        <button type="button" onClick={() => setAbaAtiva('clientes')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'clientes' ? { background: 'var(--ink)', color: 'white' } : { color: 'var(--ink-soft)' }}>
-          <Users size={14} /> clientes ({clientes.length})
+        <button type="button" onClick={() => setAbaAtiva('clientes')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'clientes' ? { background: 'var(--marca)', color: 'white' } : { color: 'var(--ink-soft)' }}>
+          <Users size={14} /> Clientes ({clientes.length})
         </button>
-        <button type="button" onClick={() => setAbaAtiva('motoboys')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'motoboys' ? { background: 'var(--ink)', color: 'white' } : { color: 'var(--ink-soft)' }}>
-          <UserCheck size={14} /> motoboys ({motoboys.length})
+        <button type="button" onClick={() => setAbaAtiva('motoboys')} className="disp text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={abaAtiva === 'motoboys' ? { background: 'var(--marca)', color: 'white' } : { color: 'var(--ink-soft)' }}>
+          <UserCheck size={14} /> Motoboys ({motoboys.length})
         </button>
       </div>
 
@@ -358,7 +361,7 @@ export default function PainelDespacho() {
       )}
 
       {carregando && !erro && (
-        <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>carregando dados...</div>
+        <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Carregando dados...</div>
       )}
 
       {!carregando && !erro && (
@@ -366,41 +369,41 @@ export default function PainelDespacho() {
           {abaAtiva === 'despacho' && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <StatCard icon={<Package size={16} />} label="pendentes" valor={pendentes.length} />
-                <StatCard icon={<Bike size={16} />} label="em rota" valor={emRota.length} cor="var(--transito-ink)" />
-                <StatCard icon={<CheckCircle2 size={16} />} label="entregues hoje" valor={entregues.length} cor="var(--sucesso-ink)" />
-                <StatCard icon={<Wallet size={16} />} label="faturado hoje" valor={`R$ ${faturamentoHoje.toFixed(2)}`} cor="var(--accent-ink)" />
+                <StatCard icon={<Package size={16} />} label="Pendentes" valor={pendentes.length} />
+                <StatCard icon={<Bike size={16} />} label="Em rota" valor={emRota.length} cor="var(--transito-ink)" />
+                <StatCard icon={<CheckCircle2 size={16} />} label="Entregues hoje" valor={entregues.length} cor="var(--sucesso-ink)" />
+                <StatCard icon={<Wallet size={16} />} label="Faturado hoje" valor={`R$ ${faturamentoHoje.toFixed(2)}`} cor="var(--accent-ink)" />
               </div>
 
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex flex-col gap-4 md:w-80 md:flex-shrink-0">
                   <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                    <div className="disp text-sm font-semibold mb-3">novo pedido</div>
+                    <div className="disp text-sm font-semibold mb-3">Novo pedido</div>
                     <div className="flex flex-col gap-2">
-                      <select aria-label="cliente cadastrado" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} value={form.clienteId ?? ''} onChange={selecionarClienteNoPedido}>
-                        <option value="">+ cliente novo</option>
+                      <select aria-label="Cliente cadastrado" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} value={form.clienteId ?? ''} onChange={selecionarClienteNoPedido}>
+                        <option value="">+ Cliente novo</option>
                         {clientes.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
                       </select>
-                      <input aria-label="cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="nome do cliente" value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} onKeyDown={aoTeclar} />
-                      <input aria-label="telefone" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="telefone" value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} onKeyDown={aoTeclar} />
-                      <input aria-label="endereço de entrega" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="endereço de entrega" value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} onKeyDown={aoTeclar} />
+                      <input aria-label="Cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Nome do cliente" value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} onKeyDown={aoTeclar} />
+                      <input aria-label="Telefone" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Telefone" value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} onKeyDown={aoTeclar} />
+                      <input aria-label="Endereço de entrega" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço de entrega" value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} onKeyDown={aoTeclar} />
                       <div className="flex gap-2">
-                        <input aria-label="valor" type="number" min="0" step="0.5" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} placeholder="valor (R$)" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} onKeyDown={aoTeclar} />
-                        <select aria-label="forma de pagamento" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} value={form.pagamento} onChange={(e) => setForm({ ...form, pagamento: e.target.value })}>
+                        <input aria-label="Valor" type="number" min="0" step="0.5" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} placeholder="Valor (R$)" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} onKeyDown={aoTeclar} />
+                        <select aria-label="Forma de pagamento" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} value={form.pagamento} onChange={(e) => setForm({ ...form, pagamento: e.target.value })}>
                           {FORMAS_PAGAMENTO.map((f) => <option key={f.valor} value={f.valor}>{f.label}</option>)}
                         </select>
                       </div>
-                      <button type="button" onClick={lancarPedido} disabled={!podeLancar} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--ink)' }}>
-                        <Plus size={15} /> {salvandoPedido ? 'lançando...' : 'lançar pedido'}
+                      <button type="button" onClick={lancarPedido} disabled={!podeLancar} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--marca)' }}>
+                        <Plus size={15} /> {salvandoPedido ? 'Lançando...' : 'Lançar pedido'}
                       </button>
                       {!form.clienteId && form.cliente.trim() && (
-                        <div className="text-xs text-center" style={{ color: 'var(--ink-soft)' }}>cliente novo — vai ser cadastrado automaticamente</div>
+                        <div className="text-xs text-center" style={{ color: 'var(--ink-soft)' }}>Cliente novo — vai ser cadastrado automaticamente.</div>
                       )}
                     </div>
                   </div>
 
                   <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                    <div className="disp text-sm font-semibold mb-3">frota hoje</div>
+                    <div className="disp text-sm font-semibold mb-3">Frota hoje</div>
                     <div className="flex flex-col gap-3">
                       {frota.map((m) => (
                         <div key={m.id} className="flex items-center justify-between text-sm">
@@ -409,18 +412,18 @@ export default function PainelDespacho() {
                             {primeiroNome(m.nomeCompleto)}
                           </div>
                           <div style={{ color: 'var(--ink-soft)' }} className="text-xs text-right">
-                            {m.ocupado ? 'em rota' : 'livre'} · {m.corridas} corrida{m.corridas === 1 ? '' : 's'} · R$ {(m.corridas * COMISSAO_POR_ENTREGA).toFixed(2)}
+                            {m.ocupado ? 'Em rota' : 'Livre'} · {m.corridas} corrida{m.corridas === 1 ? '' : 's'} · R$ {(m.corridas * COMISSAO_POR_ENTREGA).toFixed(2)}
                           </div>
                         </div>
                       ))}
-                      {frota.length === 0 && <div className="text-xs" style={{ color: 'var(--ink-soft)' }}>nenhum motoboy cadastrado ainda.</div>}
+                      {frota.length === 0 && <div className="text-xs" style={{ color: 'var(--ink-soft)' }}>Nenhum motoboy cadastrado ainda.</div>}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex-1 rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                  <div className="disp text-sm font-semibold mb-3">fila de despacho</div>
-                  {pedidos.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>nenhum pedido lançado ainda.</div>}
+                  <div className="disp text-sm font-semibold mb-3">Fila de despacho</div>
+                  {pedidos.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Nenhum pedido lançado ainda.</div>}
                   <div className="flex flex-col gap-3">
                     {pedidos.map((p) => (
                       <div key={p.id} className="rounded-xl p-3" style={{ border: '1px solid var(--line)' }}>
@@ -438,8 +441,8 @@ export default function PainelDespacho() {
 
                         {p.status === 'pendente' && (
                           <div className="flex items-center gap-2 mt-3">
-                            <select aria-label="despachar para" className="text-xs px-2 py-1.5 rounded-lg outline-none flex-1" style={{ border: '1px solid var(--line)' }} defaultValue="" onChange={(e) => e.target.value && despachar(p.id, e.target.value)}>
-                              <option value="" disabled>despachar para...</option>
+                            <select aria-label="Despachar para" className="text-xs px-2 py-1.5 rounded-lg outline-none flex-1" style={{ border: '1px solid var(--line)' }} defaultValue="" onChange={(e) => e.target.value && despachar(p.id, e.target.value)}>
+                              <option value="" disabled>Despachar para...</option>
                               {frota.filter((m) => !m.ocupado).map((m) => <option key={m.id} value={m.id}>{primeiroNome(m.nomeCompleto)}</option>)}
                             </select>
                           </div>
@@ -448,9 +451,9 @@ export default function PainelDespacho() {
                         {p.status === 'em_rota' && (
                           <div className="mt-3">
                             <div className="text-xs flex items-center justify-between flex-wrap gap-2" style={{ color: 'var(--ink-soft)' }}>
-                              <span>{nomeMotoboy(p.motoboyId)} · saiu às {p.hora}</span>
+                              <span>{nomeMotoboy(p.motoboyId)} · Saiu às {p.hora}</span>
                               <button type="button" onClick={() => marcarEntregue(p.id)} className="text-xs font-medium px-2 py-1 rounded-lg text-white" style={{ background: 'var(--sucesso)' }}>
-                                marcar entregue
+                                Marcar entregue
                               </button>
                             </div>
                             <div className="rota-track">
@@ -461,7 +464,7 @@ export default function PainelDespacho() {
 
                         {p.status === 'entregue' && (
                           <div className="text-xs mt-2 flex items-center gap-1" style={{ color: 'var(--sucesso-ink)' }}>
-                            <CheckCircle2 size={12} /> entregue por {nomeMotoboy(p.motoboyId)}
+                            <CheckCircle2 size={12} /> Entregue por {nomeMotoboy(p.motoboyId)}
                           </div>
                         )}
                       </div>
@@ -476,14 +479,14 @@ export default function PainelDespacho() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex flex-col gap-4 md:w-80 md:flex-shrink-0">
                 <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                  <div className="disp text-sm font-semibold mb-3">novo cliente</div>
+                  <div className="disp text-sm font-semibold mb-3">Novo cliente</div>
                   <div className="flex flex-col gap-2">
-                    <input aria-label="nome do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="nome" value={formCliente.nome} onChange={(e) => setFormCliente({ ...formCliente, nome: e.target.value })} onKeyDown={aoTeclarCliente} />
-                    <input aria-label="telefone do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="telefone" value={formCliente.telefone} onChange={(e) => setFormCliente({ ...formCliente, telefone: e.target.value })} onKeyDown={aoTeclarCliente} />
-                    <input aria-label="endereço do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="endereço (opcional)" value={formCliente.endereco} onChange={(e) => setFormCliente({ ...formCliente, endereco: e.target.value })} onKeyDown={aoTeclarCliente} />
-                    <input aria-label="observações" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="observações (opcional)" value={formCliente.observacoes} onChange={(e) => setFormCliente({ ...formCliente, observacoes: e.target.value })} onKeyDown={aoTeclarCliente} />
-                    <button type="button" onClick={cadastrarCliente} disabled={!podeCadastrarCliente} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--ink)' }}>
-                      <Plus size={15} /> {salvandoCliente ? 'cadastrando...' : 'cadastrar cliente'}
+                    <input aria-label="Nome do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Nome" value={formCliente.nome} onChange={(e) => setFormCliente({ ...formCliente, nome: e.target.value })} onKeyDown={aoTeclarCliente} />
+                    <input aria-label="Telefone do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Telefone" value={formCliente.telefone} onChange={(e) => setFormCliente({ ...formCliente, telefone: e.target.value })} onKeyDown={aoTeclarCliente} />
+                    <input aria-label="Endereço do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço (opcional)" value={formCliente.endereco} onChange={(e) => setFormCliente({ ...formCliente, endereco: e.target.value })} onKeyDown={aoTeclarCliente} />
+                    <input aria-label="Observações" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Observações (opcional)" value={formCliente.observacoes} onChange={(e) => setFormCliente({ ...formCliente, observacoes: e.target.value })} onKeyDown={aoTeclarCliente} />
+                    <button type="button" onClick={cadastrarCliente} disabled={!podeCadastrarCliente} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--marca)' }}>
+                      <Plus size={15} /> {salvandoCliente ? 'Cadastrando...' : 'Cadastrar cliente'}
                     </button>
                   </div>
                 </div>
@@ -491,11 +494,11 @@ export default function PainelDespacho() {
 
               <div className="flex-1 rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
                 <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                  <div className="disp text-sm font-semibold">clientes cadastrados</div>
-                  <input aria-label="buscar cliente" className="text-xs px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid var(--line)', minWidth: 180 }} placeholder="buscar por nome ou telefone" value={buscaCliente} onChange={(e) => setBuscaCliente(e.target.value)} />
+                  <div className="disp text-sm font-semibold">Clientes cadastrados</div>
+                  <input aria-label="Buscar cliente" className="text-xs px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid var(--line)', minWidth: 180 }} placeholder="Buscar por nome ou telefone" value={buscaCliente} onChange={(e) => setBuscaCliente(e.target.value)} />
                 </div>
                 <div className="flex flex-col gap-2">
-                  {clientesFiltrados.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>nenhum cliente encontrado.</div>}
+                  {clientesFiltrados.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Nenhum cliente encontrado.</div>}
                   {clientesFiltrados.map((c) => (
                     <div key={c.id} className="rounded-xl p-3 flex items-start justify-between gap-2" style={{ border: '1px solid var(--line)' }}>
                       <div>
@@ -507,7 +510,7 @@ export default function PainelDespacho() {
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
                         <span className="text-xs whitespace-nowrap" style={{ color: 'var(--ink-soft)' }}>{pedidosDoCliente(c.id)} pedido{pedidosDoCliente(c.id) === 1 ? '' : 's'}</span>
                         <button type="button" onClick={() => removerCliente(c.id)} className="text-xs flex items-center gap-1" style={{ color: 'var(--perigo-ink)' }}>
-                          <Trash2 size={12} /> remover
+                          <Trash2 size={12} /> Remover
                         </button>
                       </div>
                     </div>
@@ -521,40 +524,40 @@ export default function PainelDespacho() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex flex-col gap-4 md:w-80 md:flex-shrink-0">
                 <div className="rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                  <div className="disp text-sm font-semibold mb-3">novo motoboy</div>
+                  <div className="disp text-sm font-semibold mb-3">Novo motoboy</div>
                   <div className="flex flex-col gap-2">
-                    <input aria-label="nome completo" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="nome completo" value={formMotoboy.nomeCompleto} onChange={(e) => setFormMotoboy({ ...formMotoboy, nomeCompleto: e.target.value })} onKeyDown={aoTeclarMotoboy} />
-                    <input aria-label="credencial" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="credencial" value={formMotoboy.credencial} onChange={(e) => setFormMotoboy({ ...formMotoboy, credencial: e.target.value })} onKeyDown={aoTeclarMotoboy} />
-                    <input aria-label="celular" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="número do celular" value={formMotoboy.celular} onChange={(e) => setFormMotoboy({ ...formMotoboy, celular: e.target.value })} onKeyDown={aoTeclarMotoboy} />
+                    <input aria-label="Nome completo" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Nome completo" value={formMotoboy.nomeCompleto} onChange={(e) => setFormMotoboy({ ...formMotoboy, nomeCompleto: e.target.value })} onKeyDown={aoTeclarMotoboy} />
+                    <input aria-label="Credencial" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Credencial" value={formMotoboy.credencial} onChange={(e) => setFormMotoboy({ ...formMotoboy, credencial: e.target.value })} onKeyDown={aoTeclarMotoboy} />
+                    <input aria-label="Celular" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Número do celular" value={formMotoboy.celular} onChange={(e) => setFormMotoboy({ ...formMotoboy, celular: e.target.value })} onKeyDown={aoTeclarMotoboy} />
                     <input aria-label="CPF" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="CPF" value={formMotoboy.cpf} onChange={(e) => setFormMotoboy({ ...formMotoboy, cpf: formatarCPF(e.target.value) })} onKeyDown={aoTeclarMotoboy} />
-                    <input aria-label="endereço" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="endereço" value={formMotoboy.endereco} onChange={(e) => setFormMotoboy({ ...formMotoboy, endereco: e.target.value })} onKeyDown={aoTeclarMotoboy} />
-                    <input aria-label="placa da moto" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="placa da moto" value={formMotoboy.placa} onChange={(e) => setFormMotoboy({ ...formMotoboy, placa: e.target.value.toUpperCase() })} onKeyDown={aoTeclarMotoboy} />
-                    <button type="button" onClick={cadastrarMotoboy} disabled={!podeCadastrarMotoboy} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--ink)' }}>
-                      <Plus size={15} /> {salvandoMotoboy ? 'cadastrando...' : 'cadastrar motoboy'}
+                    <input aria-label="Endereço" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço" value={formMotoboy.endereco} onChange={(e) => setFormMotoboy({ ...formMotoboy, endereco: e.target.value })} onKeyDown={aoTeclarMotoboy} />
+                    <input aria-label="Placa da moto" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Placa da moto" value={formMotoboy.placa} onChange={(e) => setFormMotoboy({ ...formMotoboy, placa: e.target.value.toUpperCase() })} onKeyDown={aoTeclarMotoboy} />
+                    <button type="button" onClick={cadastrarMotoboy} disabled={!podeCadastrarMotoboy} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--marca)' }}>
+                      <Plus size={15} /> {salvandoMotoboy ? 'Cadastrando...' : 'Cadastrar motoboy'}
                     </button>
                   </div>
                 </div>
               </div>
 
               <div className="flex-1 rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
-                <div className="disp text-sm font-semibold mb-3">motoboys cadastrados</div>
+                <div className="disp text-sm font-semibold mb-3">Motoboys cadastrados</div>
                 <div className="flex flex-col gap-2">
-                  {motoboys.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>nenhum motoboy cadastrado ainda.</div>}
+                  {motoboys.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Nenhum motoboy cadastrado ainda.</div>}
                   {motoboys.map((m) => (
                     <div key={m.id} className="rounded-xl p-3" style={{ border: '1px solid var(--line)' }}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="text-sm font-medium">{m.nomeCompleto}</div>
                           <div className="text-xs grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1.5" style={{ color: 'var(--ink-soft)' }}>
-                            <span>credencial: {m.credencial || '—'}</span>
-                            <span>placa: {m.placa || '—'}</span>
+                            <span>Credencial: {m.credencial || '—'}</span>
+                            <span>Placa: {m.placa || '—'}</span>
                             <span className="flex items-center gap-1"><Phone size={11} /> {m.celular || '—'}</span>
                             <span>CPF: {m.cpf || '—'}</span>
                           </div>
                           {m.endereco && <div className="text-xs flex items-center gap-1 mt-1" style={{ color: 'var(--ink-soft)' }}><MapPin size={12} /> {m.endereco}</div>}
                         </div>
                         <button type="button" onClick={() => removerMotoboy(m.id)} className="text-xs flex items-center gap-1 flex-shrink-0" style={{ color: 'var(--perigo-ink)' }}>
-                          <Trash2 size={12} /> remover
+                          <Trash2 size={12} /> Remover
                         </button>
                       </div>
                     </div>
@@ -567,7 +570,7 @@ export default function PainelDespacho() {
       )}
 
       <div className="text-xs mt-6 text-center" style={{ color: 'var(--ink-soft)' }}>
-        dados salvos em tempo real no Supabase — sem GPS de verdade
+        Dados salvos em tempo real no Supabase — sem GPS de verdade.
       </div>
     </div>
   );
@@ -584,9 +587,9 @@ function StatCard({ icon, label, valor, cor = 'var(--ink)' }) {
 
 function Badge({ status }) {
   const map = {
-    pendente: { texto: 'pendente', bg: '#F1EFE6', cor: '#5B6D69' },
-    em_rota: { texto: 'em rota', bg: '#FCF0CC', cor: '#6B4E00' },
-    entregue: { texto: 'entregue', bg: '#DDF3E8', cor: '#054D36' },
+    pendente: { texto: 'Pendente', bg: '#EDEAE0', cor: '#5C6B61' },
+    em_rota: { texto: 'Em rota', bg: '#FCF0CC', cor: '#6B4E00' },
+    entregue: { texto: 'Entregue', bg: '#E3F3DA', cor: '#1F3D2B' },
   };
   const s = map[status];
   return <span className="text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0" style={{ background: s.bg, color: s.cor }}>{s.texto}</span>;

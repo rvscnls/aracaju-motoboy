@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -32,15 +33,16 @@ export default function LoginPage() {
       className="w-full min-h-full flex items-center justify-center p-4"
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
         :root {
-          --bg: #FBFAF6;
-          --ink: #1C2A28;
-          --ink-soft: #5B6D69;
-          --line: #DEDCD1;
+          --bg: #F3F1EA;
+          --ink: #1A1A1A;
+          --ink-soft: #5C6B61;
+          --line: #DCD8CC;
           --card: #FFFFFF;
+          --marca: #1F3D2B;
           --perigo-ink: #9C2B2B;
-          --font-display: 'Space Grotesk', sans-serif;
+          --font-display: 'Baloo 2', sans-serif;
           --font-body: 'IBM Plex Sans', sans-serif;
         }
         .disp { font-family: var(--font-display); }
@@ -51,27 +53,27 @@ export default function LoginPage() {
         className="rounded-2xl p-6 w-full max-w-sm flex flex-col gap-3"
         style={{ background: 'var(--card)', border: '1px solid var(--line)' }}
       >
-        <div className="disp text-xl font-semibold tracking-tight">Aracaju Motoboy</div>
-        <div className="text-xs mb-2" style={{ color: 'var(--ink-soft)' }}>painel de despacho — login</div>
+        <Image src="/logo.png" alt="Aracaju Motoboy" width={804} height={316} priority className="h-12 w-auto self-center" />
+        <div className="text-xs mb-2 text-center" style={{ color: 'var(--ink-soft)' }}>Painel de despacho — login</div>
 
         <input
-          aria-label="e-mail"
+          aria-label="E-mail"
           type="email"
           required
           autoFocus
           className="text-sm px-3 py-2 rounded-lg outline-none"
           style={{ border: '1px solid var(--line)' }}
-          placeholder="e-mail"
+          placeholder="E-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
-          aria-label="senha"
+          aria-label="Senha"
           type="password"
           required
           className="text-sm px-3 py-2 rounded-lg outline-none"
           style={{ border: '1px solid var(--line)' }}
-          placeholder="senha"
+          placeholder="Senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
         />
@@ -84,9 +86,9 @@ export default function LoginPage() {
           type="submit"
           disabled={entrando}
           className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 disabled:opacity-40"
-          style={{ background: 'var(--ink)' }}
+          style={{ background: 'var(--marca)' }}
         >
-          {entrando ? 'entrando...' : 'entrar'}
+          {entrando ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
     </div>
