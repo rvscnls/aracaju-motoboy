@@ -27,6 +27,27 @@ function formatarCPF(valor) {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
+function numeroWhatsApp(celular) {
+  const digitos = (celular || '').replace(/\D/g, '');
+  if (!digitos) return null;
+  return digitos.startsWith('55') ? digitos : `55${digitos}`;
+}
+
+function mensagemDespacho(pedido) {
+  return [
+    'Novo pedido pra você! 🏍️',
+    `Cliente: ${pedido.cliente}`,
+    `Endereço: ${pedido.endereco}`,
+    `Valor: R$ ${Number(pedido.valor).toFixed(2)} (${pedido.pagamento})`,
+  ].join('\n');
+}
+
+function linkWhatsApp(celular, mensagem) {
+  const numero = numeroWhatsApp(celular);
+  if (!numero) return null;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+}
+
 function formatarHora(isoString) {
   return new Date(isoString).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
@@ -215,9 +236,23 @@ export default function PainelDespacho() {
     }
   }
 
-  async function despachar(pedidoId, motoboyId) {
+  async function atualizarDespacho(pedidoId, motoboyId) {
     const { error } = await supabase.from('pedidos').update({ motoboy_id: motoboyId, status: 'em_rota' }).eq('id', pedidoId);
     if (error) alert('Não deu pra despachar: ' + error.message);
+  }
+
+  function despachar(pedidoId, motoboyId) {
+    const pedido = pedidos.find((p) => p.id === pedidoId);
+    const motoboy = motoboys.find((m) => m.id === motoboyId);
+    if (pedido && motoboy) {
+      const link = linkWhatsApp(motoboy.celular, mensagemDespacho(pedido));
+      if (link) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+      } else {
+        alert(`${primeiroNome(motoboy.nomeCompleto)} não tem celular cadastrado — despachando sem enviar WhatsApp.`);
+      }
+    }
+    atualizarDespacho(pedidoId, motoboyId);
   }
 
   async function marcarEntregue(pedidoId) {
