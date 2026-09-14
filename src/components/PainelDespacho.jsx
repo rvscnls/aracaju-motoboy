@@ -357,10 +357,11 @@ export default function PainelDespacho() {
         @media (prefers-reduced-motion: reduce) { .rota-bike { animation: none; left: 40%; } }
       `}</style>
 
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <div>
-          <Image src="/logo.png" alt="Aracaju Motoboy" width={804} height={316} priority className="h-9 md:h-11 w-auto" />
-          <div className="text-xs mt-1" style={{ color: 'var(--ink-soft)' }}>Painel de despacho</div>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center gap-4 md:gap-5">
+          <Image src="/logo.png" alt="Aracaju Motoboy" width={804} height={316} priority className="h-12 md:h-14 w-auto" />
+          <div className="hidden sm:block" style={{ width: 1, height: 32, background: 'var(--line)' }} />
+          <div className="disp text-sm md:text-lg font-bold uppercase tracking-wide" style={{ color: 'var(--marca)' }}>Painel de Serviços</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-xs px-3 py-1 rounded-full capitalize" style={{ background: 'var(--card)', border: '1px solid var(--line)', color: 'var(--ink-soft)' }}>

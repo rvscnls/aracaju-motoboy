@@ -54,7 +54,7 @@ export default function LoginPage() {
         style={{ background: 'var(--card)', border: '1px solid var(--line)' }}
       >
         <Image src="/logo.png" alt="Aracaju Motoboy" width={804} height={316} priority className="h-12 w-auto self-center" />
-        <div className="text-xs mb-2 text-center" style={{ color: 'var(--ink-soft)' }}>Painel de despacho — login</div>
+        <div className="text-xs mb-2 text-center" style={{ color: 'var(--ink-soft)' }}>Painel de Serviços — login</div>
 
         <input
           aria-label="E-mail"
