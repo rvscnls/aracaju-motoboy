@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Plus, Bike, MapPin, Flag,Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
+import { Plus, Bike, MapPin, Flag, Phone, Copy, Check, X, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const FORMAS_PAGAMENTO = [
@@ -27,26 +27,20 @@ function formatarCPF(valor) {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
-function numeroWhatsApp(celular) {
-  const digitos = (celular || '').replace(/\D/g, '');
-  if (!digitos) return null;
-  return digitos.startsWith('55') ? digitos : `55${digitos}`;
+function rotuloPagamento(valor) {
+  return FORMAS_PAGAMENTO.find((f) => f.valor === valor)?.label || valor;
 }
 
 function mensagemDespacho(pedido) {
   return [
     'Novo pedido pra você! 🏍️',
+    '',
     `Cliente: ${pedido.cliente}`,
+    ...(pedido.telefone ? [`Telefone do cliente: ${pedido.telefone}`] : []),
     `Coleta: ${pedido.endereco}`,
     ...(pedido.enderecoEntrega ? [`Entrega: ${pedido.enderecoEntrega}`] : []),
-    `Valor: R$ ${Number(pedido.valor).toFixed(2)} (${pedido.pagamento})`,
+    `Valor: R$ ${Number(pedido.valor).toFixed(2).replace('.', ',')} (${rotuloPagamento(pedido.pagamento)})`,
   ].join('\n');
-}
-
-function linkWhatsApp(celular, mensagem) {
-  const numero = numeroWhatsApp(celular);
-  if (!numero) return null;
-  return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
 }
 
 function formatarHora(isoString) {
@@ -138,6 +132,18 @@ export default function PainelDespacho() {
   const [form, setForm] = useState({ cliente: '', telefone: '', endereco: '', enderecoEntrega: '', valor: '', pagamento: 'pix', clienteId: null });
   const [salvandoPedido, setSalvandoPedido] = useState(false);
   const [diaAtual, setDiaAtual] = useState(() => chaveDia(new Date()));
+  const [mensagemAberta, setMensagemAberta] = useState(null);
+  const [copiado, setCopiado] = useState(false);
+  const areaMensagemRef = useRef(null);
+
+  useEffect(() => {
+    if (!mensagemAberta) return;
+    function aoTeclarEsc(e) {
+      if (e.key === 'Escape') setMensagemAberta(null);
+    }
+    window.addEventListener('keydown', aoTeclarEsc);
+    return () => window.removeEventListener('keydown', aoTeclarEsc);
+  }, [mensagemAberta]);
 
   useEffect(() => {
     const id = setInterval(() => setDiaAtual(chaveDia(new Date())), 60000);
@@ -295,23 +301,33 @@ export default function PainelDespacho() {
       .single();
     if (error) {
       alert('Não deu pra despachar: ' + error.message);
-      return;
+      return false;
     }
     salvarLocal(setPedidos, mapPedido(data));
+    return true;
   }
 
-  function despachar(pedidoId, motoboyId) {
+  function abrirMensagem(pedido, motoboy) {
+    setCopiado(false);
+    setMensagemAberta({ motoboyNome: primeiroNome(motoboy.nomeCompleto), celular: motoboy.celular, texto: mensagemDespacho(pedido) });
+  }
+
+  async function despachar(pedidoId, motoboyId) {
     const pedido = pedidos.find((p) => p.id === pedidoId);
     const motoboy = motoboys.find((m) => m.id === motoboyId);
-    if (pedido && motoboy) {
-      const link = linkWhatsApp(motoboy.celular, mensagemDespacho(pedido));
-      if (link) {
-        window.open(link, '_blank', 'noopener,noreferrer');
-      } else {
-        alert(`${primeiroNome(motoboy.nomeCompleto)} não tem celular cadastrado — despachando sem enviar WhatsApp.`);
-      }
+    const ok = await atualizarDespacho(pedidoId, motoboyId);
+    if (ok && pedido && motoboy) abrirMensagem(pedido, motoboy);
+  }
+
+  async function copiarMensagem() {
+    try {
+      await navigator.clipboard.writeText(mensagemAberta.texto);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      areaMensagemRef.current?.select();
+      alert('Não consegui copiar sozinho. A mensagem foi selecionada: aperte Ctrl+C para copiar.');
     }
-    atualizarDespacho(pedidoId, motoboyId);
   }
 
   async function marcarEntregue(pedidoId) {
@@ -569,9 +585,22 @@ export default function PainelDespacho() {
                           <div className="mt-3">
                             <div className="text-xs flex items-center justify-between flex-wrap gap-2" style={{ color: 'var(--ink-soft)' }}>
                               <span>{nomeMotoboy(p.motoboyId)} · Saiu às {p.hora}</span>
-                              <button type="button" onClick={() => marcarEntregue(p.id)} className="text-xs font-medium px-2 py-1 rounded-lg text-white" style={{ background: 'var(--sucesso)' }}>
-                                Marcar entregue
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const m = motoboys.find((m) => m.id === p.motoboyId);
+                                    if (m) abrirMensagem(p, m);
+                                  }}
+                                  className="text-xs font-medium px-2 py-1 rounded-lg"
+                                  style={{ border: '1px solid var(--line)', color: 'var(--ink-soft)', background: 'var(--card)' }}
+                                >
+                                  Ver mensagem
+                                </button>
+                                <button type="button" onClick={() => marcarEntregue(p.id)} className="text-xs font-medium px-2 py-1 rounded-lg text-white" style={{ background: 'var(--sucesso)' }}>
+                                  Marcar entregue
+                                </button>
+                              </div>
                             </div>
                             <div className="rota-track">
                               <Bike size={14} className="rota-bike" style={{ color: 'var(--transito-ink)' }} />
@@ -689,6 +718,61 @@ export default function PainelDespacho() {
       <div className="text-xs mt-6 text-center" style={{ color: 'var(--ink-soft)' }}>
         Dados salvos em tempo real no Supabase — sem GPS de verdade.
       </div>
+
+      {mensagemAberta && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(26,26,26,0.55)' }}
+          onClick={() => setMensagemAberta(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mensagem para o motoboy"
+            className="w-full max-w-xl rounded-2xl p-5 md:p-6"
+            style={{ background: 'var(--card)', border: '1px solid var(--line)', boxShadow: '0 24px 60px -20px rgba(26,26,26,0.45)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="disp text-lg font-bold" style={{ color: 'var(--marca)' }}>Mensagem para {mensagemAberta.motoboyNome}</div>
+              <button type="button" aria-label="Fechar" onClick={() => setMensagemAberta(null)} style={{ color: 'var(--ink-soft)' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="text-xs mt-1 mb-3" style={{ color: 'var(--ink-soft)' }}>
+              Copie e cole na conversa do WhatsApp{mensagemAberta.celular ? ` (${mensagemAberta.celular})` : ''}.
+            </div>
+            <textarea
+              ref={areaMensagemRef}
+              readOnly
+              rows={9}
+              value={mensagemAberta.texto}
+              onFocus={(e) => e.target.select()}
+              className="w-full text-sm p-3 rounded-xl outline-none resize-none"
+              style={{ border: '1px solid var(--line)', background: 'var(--bg)', color: 'var(--ink)' }}
+            />
+            <div className="flex flex-wrap justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setMensagemAberta(null)}
+                className="disp text-sm font-semibold px-4 py-2 rounded-lg"
+                style={{ border: '1px solid var(--line)', color: 'var(--ink-soft)', background: 'var(--card)' }}
+              >
+                Fechar
+              </button>
+              <button
+                type="button"
+                onClick={copiarMensagem}
+                className="disp text-sm font-semibold text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                style={{ background: 'var(--marca)' }}
+              >
+                {copiado ? <Check size={16} /> : <Copy size={16} />}
+                {copiado ? 'Copiado!' : 'Copiar mensagem'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
