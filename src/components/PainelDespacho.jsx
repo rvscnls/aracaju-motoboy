@@ -223,6 +223,8 @@ export default function PainelDespacho() {
     });
   }, [pedidos, pedidosDeHoje, motoboys]);
 
+  const frotaOrdenada = useMemo(() => [...frota].sort((a, b) => Number(a.ocupado) - Number(b.ocupado)), [frota]);
+
   const clientesFiltrados = useMemo(() => {
     const termo = buscaCliente.trim().toLowerCase();
     if (!termo) return clientes;
@@ -558,7 +560,7 @@ export default function PainelDespacho() {
                           <div className="flex items-center gap-2 mt-3">
                             <select aria-label="Despachar para" className="text-xs px-2 py-1.5 rounded-lg outline-none flex-1" style={{ border: '1px solid var(--line)' }} defaultValue="" onChange={(e) => e.target.value && despachar(p.id, e.target.value)}>
                               <option value="" disabled>Despachar para...</option>
-                              {frota.filter((m) => !m.ocupado).map((m) => <option key={m.id} value={m.id}>{primeiroNome(m.nomeCompleto)}</option>)}
+                              {frotaOrdenada.map((m) => <option key={m.id} value={m.id}>{primeiroNome(m.nomeCompleto)}{m.ocupado ? ' (em rota)' : ''}</option>)}
                             </select>
                           </div>
                         )}
