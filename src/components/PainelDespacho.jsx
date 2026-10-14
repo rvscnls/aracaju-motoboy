@@ -91,6 +91,13 @@ function mapPedido(row) {
   };
 }
 
+function salvarLocal(setState, item, { prepend = false } = {}) {
+  setState((atual) => {
+    if (atual.some((i) => i.id === item.id)) return atual.map((i) => (i.id === item.id ? item : i));
+    return prepend ? [item, ...atual] : [...atual, item];
+  });
+}
+
 function aplicarMudancaRealtime(setState, mapRow, payload, { prepend = false } = {}) {
   setState((atual) => {
     if (payload.eventType === 'INSERT') {
@@ -135,31 +142,44 @@ export default function PainelDespacho() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    let ativo = true;
-    async function carregarDados() {
+  const carregarDados = useCallback(
+    async ({ silencioso = false } = {}) => {
       const [resClientes, resMotoboys, resPedidos] = await Promise.all([
         supabase.from('clientes').select('*').order('nome'),
         supabase.from('motoboys').select('*').order('nome_completo'),
         supabase.from('pedidos').select('*').order('created_at', { ascending: false }),
       ]);
-      if (!ativo) return;
       const primeiroErro = resClientes.error || resMotoboys.error || resPedidos.error;
       if (primeiroErro) {
-        setErro(primeiroErro.message);
-        setCarregando(false);
+        if (!silencioso) {
+          setErro(primeiroErro.message);
+          setCarregando(false);
+        }
         return;
       }
       setClientes(resClientes.data.map(mapCliente));
       setMotoboys(resMotoboys.data.map(mapMotoboy));
       setPedidos(resPedidos.data.map(mapPedido));
       setCarregando(false);
-    }
+    },
+    [supabase]
+  );
+
+  useEffect(() => {
     carregarDados();
+  }, [carregarDados]);
+
+  useEffect(() => {
+    function aoVoltar() {
+      if (document.visibilityState === 'visible') carregarDados({ silencioso: true });
+    }
+    document.addEventListener('visibilitychange', aoVoltar);
+    window.addEventListener('focus', aoVoltar);
     return () => {
-      ativo = false;
+      document.removeEventListener('visibilitychange', aoVoltar);
+      window.removeEventListener('focus', aoVoltar);
     };
-  }, []);
+  }, [carregarDados]);
 
   useEffect(() => {
     const canal = supabase
@@ -235,18 +255,24 @@ export default function PainelDespacho() {
           .single();
         if (error) throw error;
         clienteId = data.id;
+        salvarLocal(setClientes, mapCliente(data));
       }
-      const { error } = await supabase.from('pedidos').insert({
-        cliente_id: clienteId,
-        motoboy_id: null,
-        cliente: form.cliente,
-        telefone: form.telefone,
-        endereco: form.endereco,
-        valor: Number(form.valor),
-        pagamento: form.pagamento,
-        status: 'pendente',
-      });
+      const { data: pedidoCriado, error } = await supabase
+        .from('pedidos')
+        .insert({
+          cliente_id: clienteId,
+          motoboy_id: null,
+          cliente: form.cliente,
+          telefone: form.telefone,
+          endereco: form.endereco,
+          valor: Number(form.valor),
+          pagamento: form.pagamento,
+          status: 'pendente',
+        })
+        .select()
+        .single();
       if (error) throw error;
+      salvarLocal(setPedidos, mapPedido(pedidoCriado), { prepend: true });
       setForm({ cliente: '', telefone: '', endereco: '', valor: '', pagamento: 'pix', clienteId: null });
     } catch (error) {
       alert('Não deu pra lançar o pedido: ' + error.message);
@@ -256,8 +282,17 @@ export default function PainelDespacho() {
   }
 
   async function atualizarDespacho(pedidoId, motoboyId) {
-    const { error } = await supabase.from('pedidos').update({ motoboy_id: motoboyId, status: 'em_rota' }).eq('id', pedidoId);
-    if (error) alert('Não deu pra despachar: ' + error.message);
+    const { data, error } = await supabase
+      .from('pedidos')
+      .update({ motoboy_id: motoboyId, status: 'em_rota' })
+      .eq('id', pedidoId)
+      .select()
+      .single();
+    if (error) {
+      alert('Não deu pra despachar: ' + error.message);
+      return;
+    }
+    salvarLocal(setPedidos, mapPedido(data));
   }
 
   function despachar(pedidoId, motoboyId) {
@@ -275,8 +310,12 @@ export default function PainelDespacho() {
   }
 
   async function marcarEntregue(pedidoId) {
-    const { error } = await supabase.from('pedidos').update({ status: 'entregue' }).eq('id', pedidoId);
-    if (error) alert('Não deu pra marcar como entregue: ' + error.message);
+    const { data, error } = await supabase.from('pedidos').update({ status: 'entregue' }).eq('id', pedidoId).select().single();
+    if (error) {
+      alert('Não deu pra marcar como entregue: ' + error.message);
+      return;
+    }
+    salvarLocal(setPedidos, mapPedido(data));
   }
 
   function nomeMotoboy(id) {
@@ -292,8 +331,9 @@ export default function PainelDespacho() {
     if (!podeCadastrarCliente) return;
     setSalvandoCliente(true);
     try {
-      const { error } = await supabase.from('clientes').insert({ ...formCliente });
+      const { data, error } = await supabase.from('clientes').insert({ ...formCliente }).select().single();
       if (error) throw error;
+      salvarLocal(setClientes, mapCliente(data));
       setFormCliente({ nome: '', telefone: '', endereco: '', observacoes: '' });
     } catch (error) {
       alert('Não deu pra cadastrar o cliente: ' + error.message);
@@ -308,22 +348,31 @@ export default function PainelDespacho() {
 
   async function removerCliente(id) {
     const { error } = await supabase.from('clientes').delete().eq('id', id);
-    if (error) alert('Não deu pra remover o cliente: ' + error.message);
+    if (error) {
+      alert('Não deu pra remover o cliente: ' + error.message);
+      return;
+    }
+    setClientes((atual) => atual.filter((c) => c.id !== id));
   }
 
   async function cadastrarMotoboy() {
     if (!podeCadastrarMotoboy) return;
     setSalvandoMotoboy(true);
     try {
-      const { error } = await supabase.from('motoboys').insert({
-        nome_completo: formMotoboy.nomeCompleto,
-        credencial: formMotoboy.credencial,
-        celular: formMotoboy.celular,
-        cpf: formMotoboy.cpf,
-        endereco: formMotoboy.endereco,
-        placa: formMotoboy.placa,
-      });
+      const { data, error } = await supabase
+        .from('motoboys')
+        .insert({
+          nome_completo: formMotoboy.nomeCompleto,
+          credencial: formMotoboy.credencial,
+          celular: formMotoboy.celular,
+          cpf: formMotoboy.cpf,
+          endereco: formMotoboy.endereco,
+          placa: formMotoboy.placa,
+        })
+        .select()
+        .single();
       if (error) throw error;
+      salvarLocal(setMotoboys, mapMotoboy(data));
       setFormMotoboy({ nomeCompleto: '', credencial: '', celular: '', cpf: '', endereco: '', placa: '' });
     } catch (error) {
       alert('Não deu pra cadastrar o motoboy: ' + error.message);
@@ -338,7 +387,11 @@ export default function PainelDespacho() {
 
   async function removerMotoboy(id) {
     const { error } = await supabase.from('motoboys').delete().eq('id', id);
-    if (error) alert('Não deu pra remover o motoboy: ' + error.message);
+    if (error) {
+      alert('Não deu pra remover o motoboy: ' + error.message);
+      return;
+    }
+    setMotoboys((atual) => atual.filter((m) => m.id !== id));
   }
 
   async function sair() {
