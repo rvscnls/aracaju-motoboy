@@ -52,6 +52,13 @@ function formatarHora(isoString) {
   return new Date(isoString).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+function chaveDia(data) {
+  const d = new Date(data);
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
 function mapCliente(row) {
   return { id: row.id, nome: row.nome, telefone: row.telefone, endereco: row.endereco, observacoes: row.observacoes };
 }
@@ -80,6 +87,7 @@ function mapPedido(row) {
     motoboyId: row.motoboy_id,
     clienteId: row.cliente_id,
     hora: formatarHora(row.created_at),
+    criadoEm: row.created_at,
   };
 }
 
@@ -120,6 +128,12 @@ export default function PainelDespacho() {
   const [pedidos, setPedidos] = useState([]);
   const [form, setForm] = useState({ cliente: '', telefone: '', endereco: '', valor: '', pagamento: 'pix', clienteId: null });
   const [salvandoPedido, setSalvandoPedido] = useState(false);
+  const [diaAtual, setDiaAtual] = useState(() => chaveDia(new Date()));
+
+  useEffect(() => {
+    const id = setInterval(() => setDiaAtual(chaveDia(new Date())), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     let ativo = true;
@@ -166,9 +180,14 @@ export default function PainelDespacho() {
     };
   }, []);
 
+  const pedidosDeHoje = useMemo(() => pedidos.filter((p) => chaveDia(p.criadoEm) === diaAtual), [pedidos, diaAtual]);
+  const fila = useMemo(
+    () => pedidos.filter((p) => p.status !== 'entregue' || chaveDia(p.criadoEm) === diaAtual),
+    [pedidos, diaAtual]
+  );
   const pendentes = pedidos.filter((p) => p.status === 'pendente');
   const emRota = pedidos.filter((p) => p.status === 'em_rota');
-  const entregues = pedidos.filter((p) => p.status === 'entregue');
+  const entregues = pedidosDeHoje.filter((p) => p.status === 'entregue');
   const faturamentoHoje = entregues.reduce((soma, p) => soma + Number(p.valor), 0);
   const podeLancar = form.cliente.trim() && form.endereco.trim() && form.valor && !salvandoPedido;
   const podeCadastrarCliente = formCliente.nome.trim() && formCliente.telefone.trim() && !salvandoCliente;
@@ -176,11 +195,11 @@ export default function PainelDespacho() {
 
   const frota = useMemo(() => {
     return motoboys.map((m) => {
-      const corridas = pedidos.filter((p) => p.motoboyId === m.id && p.status !== 'pendente').length;
+      const corridas = pedidosDeHoje.filter((p) => p.motoboyId === m.id && p.status !== 'pendente').length;
       const ocupado = pedidos.some((p) => p.motoboyId === m.id && p.status === 'em_rota');
       return { ...m, corridas, ocupado };
     });
-  }, [pedidos, motoboys]);
+  }, [pedidos, pedidosDeHoje, motoboys]);
 
   const clientesFiltrados = useMemo(() => {
     const termo = buscaCliente.trim().toLowerCase();
@@ -459,9 +478,9 @@ export default function PainelDespacho() {
 
                 <div className="flex-1 rounded-2xl p-4" style={{ background: 'var(--card)', border: '1px solid var(--line)' }}>
                   <div className="disp text-sm font-semibold mb-3">Fila de despacho</div>
-                  {pedidos.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Nenhum pedido lançado ainda.</div>}
+                  {fila.length === 0 && <div className="text-sm" style={{ color: 'var(--ink-soft)' }}>Nenhum pedido na fila hoje.</div>}
                   <div className="flex flex-col gap-3">
-                    {pedidos.map((p) => (
+                    {fila.map((p) => (
                       <div key={p.id} className="rounded-xl p-3" style={{ border: '1px solid var(--line)' }}>
                         <div className="flex items-start justify-between gap-2">
                           <div>
