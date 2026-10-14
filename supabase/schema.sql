@@ -33,6 +33,7 @@ create table if not exists public.pedidos (
   cliente text not null,
   telefone text not null default '',
   endereco text not null,
+  endereco_entrega text not null default '',
   valor numeric(10, 2) not null,
   pagamento text not null check (pagamento in ('pix', 'dinheiro', 'cartao')),
   status text not null default 'pendente' check (status in ('pendente', 'em_rota', 'entregue')),

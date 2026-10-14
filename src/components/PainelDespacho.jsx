@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Plus, Bike, MapPin, Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
+import { Plus, Bike, MapPin, Flag,Phone, Wallet, CheckCircle2, Package, Users, Trash2, UserCheck, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const FORMAS_PAGAMENTO = [
@@ -37,7 +37,8 @@ function mensagemDespacho(pedido) {
   return [
     'Novo pedido pra você! 🏍️',
     `Cliente: ${pedido.cliente}`,
-    `Endereço: ${pedido.endereco}`,
+    `Coleta: ${pedido.endereco}`,
+    ...(pedido.enderecoEntrega ? [`Entrega: ${pedido.enderecoEntrega}`] : []),
     `Valor: R$ ${Number(pedido.valor).toFixed(2)} (${pedido.pagamento})`,
   ].join('\n');
 }
@@ -81,6 +82,7 @@ function mapPedido(row) {
     cliente: row.cliente,
     telefone: row.telefone,
     endereco: row.endereco,
+    enderecoEntrega: row.endereco_entrega || '',
     valor: Number(row.valor),
     pagamento: row.pagamento,
     status: row.status,
@@ -133,7 +135,7 @@ export default function PainelDespacho() {
   const [salvandoMotoboy, setSalvandoMotoboy] = useState(false);
 
   const [pedidos, setPedidos] = useState([]);
-  const [form, setForm] = useState({ cliente: '', telefone: '', endereco: '', valor: '', pagamento: 'pix', clienteId: null });
+  const [form, setForm] = useState({ cliente: '', telefone: '', endereco: '', enderecoEntrega: '', valor: '', pagamento: 'pix', clienteId: null });
   const [salvandoPedido, setSalvandoPedido] = useState(false);
   const [diaAtual, setDiaAtual] = useState(() => chaveDia(new Date()));
 
@@ -209,7 +211,7 @@ export default function PainelDespacho() {
   const emRota = pedidos.filter((p) => p.status === 'em_rota');
   const entregues = pedidosDeHoje.filter((p) => p.status === 'entregue');
   const faturamentoHoje = entregues.reduce((soma, p) => soma + Number(p.valor), 0);
-  const podeLancar = form.cliente.trim() && form.endereco.trim() && form.valor && !salvandoPedido;
+  const podeLancar = form.cliente.trim() && form.endereco.trim() && form.enderecoEntrega.trim() && form.valor && !salvandoPedido;
   const podeCadastrarCliente = formCliente.nome.trim() && formCliente.telefone.trim() && !salvandoCliente;
   const podeCadastrarMotoboy = formMotoboy.nomeCompleto.trim() && formMotoboy.celular.trim() && formMotoboy.placa.trim() && !salvandoMotoboy;
 
@@ -265,6 +267,7 @@ export default function PainelDespacho() {
           cliente: form.cliente,
           telefone: form.telefone,
           endereco: form.endereco,
+          endereco_entrega: form.enderecoEntrega,
           valor: Number(form.valor),
           pagamento: form.pagamento,
           status: 'pendente',
@@ -273,7 +276,7 @@ export default function PainelDespacho() {
         .single();
       if (error) throw error;
       salvarLocal(setPedidos, mapPedido(pedidoCriado), { prepend: true });
-      setForm({ cliente: '', telefone: '', endereco: '', valor: '', pagamento: 'pix', clienteId: null });
+      setForm({ cliente: '', telefone: '', endereco: '', enderecoEntrega: '', valor: '', pagamento: 'pix', clienteId: null });
     } catch (error) {
       alert('Não deu pra lançar o pedido: ' + error.message);
     } finally {
@@ -494,7 +497,8 @@ export default function PainelDespacho() {
                       </select>
                       <input aria-label="Cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Nome do cliente" value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} onKeyDown={aoTeclar} />
                       <input aria-label="Telefone" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Telefone" value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} onKeyDown={aoTeclar} />
-                      <input aria-label="Endereço de entrega" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço de entrega" value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} onKeyDown={aoTeclar} />
+                      <input aria-label="Endereço de coleta" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço de coleta" value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} onKeyDown={aoTeclar} />
+                      <input aria-label="Endereço de entrega" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço de entrega" value={form.enderecoEntrega} onChange={(e) => setForm({ ...form, enderecoEntrega: e.target.value })} onKeyDown={aoTeclar} />
                       <div className="flex gap-2">
                         <input aria-label="Valor" type="number" min="0" step="0.5" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} placeholder="Valor (R$)" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} onKeyDown={aoTeclar} />
                         <select aria-label="Forma de pagamento" className="text-sm px-3 py-2 rounded-lg outline-none w-1/2" style={{ border: '1px solid var(--line)' }} value={form.pagamento} onChange={(e) => setForm({ ...form, pagamento: e.target.value })}>
@@ -538,7 +542,10 @@ export default function PainelDespacho() {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="text-sm font-medium">{p.cliente}</div>
-                            <div className="text-xs flex items-center gap-1 mt-0.5" style={{ color: 'var(--ink-soft)' }}><MapPin size={12} /> {p.endereco}</div>
+                            <div className="text-xs flex items-center gap-1 mt-0.5" style={{ color: 'var(--ink-soft)' }}><MapPin size={12} /> Coleta: {p.endereco}</div>
+                            {p.enderecoEntrega && (
+                              <div className="text-xs flex items-center gap-1 mt-0.5" style={{ color: 'var(--ink-soft)' }}><Flag size={12} /> Entrega: {p.enderecoEntrega}</div>
+                            )}
                             <div className="text-xs flex items-center gap-3 mt-0.5 flex-wrap" style={{ color: 'var(--ink-soft)' }}>
                               <span className="flex items-center gap-1"><Phone size={12} /> {p.telefone || '—'}</span>
                               <span className="flex items-center gap-1"><Wallet size={12} /> R$ {Number(p.valor).toFixed(2)} · {p.pagamento}</span>
@@ -591,7 +598,7 @@ export default function PainelDespacho() {
                   <div className="flex flex-col gap-2">
                     <input aria-label="Nome do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Nome" value={formCliente.nome} onChange={(e) => setFormCliente({ ...formCliente, nome: e.target.value })} onKeyDown={aoTeclarCliente} />
                     <input aria-label="Telefone do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Telefone" value={formCliente.telefone} onChange={(e) => setFormCliente({ ...formCliente, telefone: e.target.value })} onKeyDown={aoTeclarCliente} />
-                    <input aria-label="Endereço do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço (opcional)" value={formCliente.endereco} onChange={(e) => setFormCliente({ ...formCliente, endereco: e.target.value })} onKeyDown={aoTeclarCliente} />
+                    <input aria-label="Endereço de coleta do cliente" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Endereço de coleta (opcional)" value={formCliente.endereco} onChange={(e) => setFormCliente({ ...formCliente, endereco: e.target.value })} onKeyDown={aoTeclarCliente} />
                     <input aria-label="Observações" className="text-sm px-3 py-2 rounded-lg outline-none" style={{ border: '1px solid var(--line)' }} placeholder="Observações (opcional)" value={formCliente.observacoes} onChange={(e) => setFormCliente({ ...formCliente, observacoes: e.target.value })} onKeyDown={aoTeclarCliente} />
                     <button type="button" onClick={cadastrarCliente} disabled={!podeCadastrarCliente} className="disp mt-1 text-sm font-semibold text-white rounded-lg py-2 flex items-center justify-center gap-1 disabled:opacity-40" style={{ background: 'var(--marca)' }}>
                       <Plus size={15} /> {salvandoCliente ? 'Cadastrando...' : 'Cadastrar cliente'}
